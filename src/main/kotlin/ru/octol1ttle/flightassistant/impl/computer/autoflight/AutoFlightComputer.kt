@@ -1,6 +1,5 @@
 package ru.octol1ttle.flightassistant.impl.computer.autoflight
 
-import kotlin.math.abs
 import net.minecraft.network.chat.Component
 import net.minecraft.resources.ResourceLocation
 import ru.octol1ttle.flightassistant.FAKeyMappings
@@ -12,10 +11,15 @@ import ru.octol1ttle.flightassistant.api.computer.ComputerBus
 import ru.octol1ttle.flightassistant.api.computer.ComputerQuery
 import ru.octol1ttle.flightassistant.api.util.FATickCounter
 import ru.octol1ttle.flightassistant.api.util.event.EntityTurnEvents
+import ru.octol1ttle.flightassistant.api.util.extensions.distance2d
+import ru.octol1ttle.flightassistant.config.FAConfig
 import ru.octol1ttle.flightassistant.impl.computer.autoflight.base.HeadingComputer
 import ru.octol1ttle.flightassistant.impl.computer.autoflight.base.PitchComputer
 import ru.octol1ttle.flightassistant.impl.computer.autoflight.base.RollComputer
 import ru.octol1ttle.flightassistant.impl.computer.autoflight.base.ThrustComputer
+import ru.octol1ttle.flightassistant.impl.display.StatusDisplay
+import kotlin.math.abs
+import kotlin.math.roundToLong
 
 class AutoFlightComputer(computers: ComputerBus) : Computer(computers) {
     var flightDirectors: Boolean = false
@@ -53,8 +57,8 @@ class AutoFlightComputer(computers: ComputerBus) : Computer(computers) {
         })
         EntityTurnEvents.X_ROT.register(EntityTurnEvents.EntityTurn { pitchDelta, output ->
             if (computers.data.flying && autopilot) {
-                pitchResistance += abs(pitchDelta)
-                if (pitchResistance < 20.0f) {
+                pitchResistance += abs(pitchDelta) / 90.0f
+                if (pitchResistance < FAConfig.global.autopilotResistanceThreshold) {
                     output.add(ControlInput(0.0f, priority = ControlInput.Priority.NORMAL))
                     return@EntityTurn
                 }
@@ -65,8 +69,8 @@ class AutoFlightComputer(computers: ComputerBus) : Computer(computers) {
         })
         EntityTurnEvents.Y_ROT.register(EntityTurnEvents.EntityTurn { headingDelta, output ->
             if (computers.data.flying && autopilot) {
-                headingResistance += abs(headingDelta)
-                if (headingResistance < 40.0f) {
+                headingResistance += abs(headingDelta) / 180.0f
+                if (headingResistance < FAConfig.global.autopilotResistanceThreshold) {
                     output.add(ControlInput(0.0f, priority = ControlInput.Priority.NORMAL))
                     return@EntityTurn
                 }
@@ -93,8 +97,8 @@ class AutoFlightComputer(computers: ComputerBus) : Computer(computers) {
             setAutoPilot(false, alert = false)
         }
 
-        pitchResistance = (pitchResistance - FATickCounter.timePassed * 10.0f).coerceAtLeast(0.0f)
-        headingResistance = (headingResistance - FATickCounter.timePassed * 20.0f).coerceAtLeast(0.0f)
+        pitchResistance = (pitchResistance - FATickCounter.TICK_TIME * FAConfig.global.autopilotResistanceThreshold).coerceAtLeast(0.0f)
+        headingResistance = (headingResistance - FATickCounter.TICK_TIME * FAConfig.global.autopilotResistanceThreshold).coerceAtLeast(0.0f)
     }
 
     fun setFlightDirectors(flightDirectors: Boolean) {
@@ -144,6 +148,15 @@ class AutoFlightComputer(computers: ComputerBus) : Computer(computers) {
 
         if (query is RollComputer.TargetRollQuery && autopilot) {
             query.respond(ControlInput(0.0f, deltaTimeMultiplier = 2.0f))
+        }
+
+        if (query is StatusDisplay.StatusMessageQuery) {
+            val mode = activeLateralMode as? FollowsCoordinatesMode ?: return
+            val distance: Double = distance2d(mode.targetX, mode.targetZ, computers.data.position.x, computers.data.position.z)
+            query.respond(Component.translatable(
+                "status.flightassistant.target_distance_time",
+                distance.roundToLong().toString(), computers.plan.getFormattedTime(distance)
+            ))
         }
     }
 

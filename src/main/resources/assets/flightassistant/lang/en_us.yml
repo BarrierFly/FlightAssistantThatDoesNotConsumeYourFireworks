@@ -36,7 +36,6 @@ alert.flightassistant: # TODO: get rid of alert categories, more flexible alert 
       flightassistant:radar_altitude: R/ALT DSPL FAULT
       flightassistant:speed: SPD DSPL FAULT
       flightassistant:status: STATUS DSPL FAULT
-      flightassistant:velocity_components: G/S & V/S DSPL FAULT
   firework:
     .: FRWK
     fault: SYS FAULT
@@ -51,6 +50,7 @@ alert.flightassistant: # TODO: get rid of alert categories, more flexible alert 
     protections_lost:
       .: PROTECT LOST
       enable_air_data: ' -AIR DATA: OFF THEN ON'
+      enable_ground_proximity: ' -GND PROX: OFF THEN ON'
       enable_pitch: ' -PITCH SYS: OFF THEN ON'
       enable_prot_sys: ' -PROT SYS: OFF THEN ON'
       max_pitch: ' MAX PITCH: 45* UP'
@@ -69,7 +69,6 @@ alert.flightassistant: # TODO: get rid of alert categories, more flexible alert 
   gpws:
     .: GPWS
     fault: FAULT
-    minimums_reached: MINIMUMS REACHED
     dont_sink: DON'T SINK
     sink_rate: SINK RATE
     terrain_ahead: TERRAIN AHEAD
@@ -111,6 +110,7 @@ config.flightassistant:
       hud_enabled: Enable HUD
       safety_enabled: Enable safety features (alerts and protections)
       automations_allowed_in_overlays: Allow automations (AP & flight prots) to run in GUIs (inventory & pause screen)
+      autopilot_resistance_threshold: Autopilot resistance threshold
     display:
       frame:
         .: Frame
@@ -251,7 +251,6 @@ menu.flightassistant:
         flightassistant:radar_altitude: Radar altitude display
         flightassistant:speed: Speed display
         flightassistant:status: Status display
-        flightassistant:velocity_components: G/S & V/S display
       computer:
         flightassistant:air_data: Air data computer
         flightassistant:hud_display_data: HUD display data computer
@@ -301,36 +300,46 @@ menu.flightassistant:
       coordinates: 'Target coordinates: '
   fms:
     .: Flight planning
-    departure:
-      .: Departure
-      takeoff_thrust: 'Takeoff thrust %: '
-      minimum_climb_speed: 'Minimum climb speed: '
-    enroute:
-      .: Enroute
-      legend:
-        hover: Hover for legend
-        origin: '%s - FROM waypoint'
-        target: '%s - TO waypoint'
-        direct-to: '%s - DIRECT-TO waypoint'
-      delete_all: Delete all
-      add_waypoint: Add waypoint
-      direct_to: Direct-to
-      unsaved_changes: UNSAVED CHANGES
-    arrival:
-      .: Arrival
-      minimums:
-        .: 'Minimums: '
-        absolute: ABS
-        relative: REL
-      landing_thrust: 'Landing thrust %: '
-      go_around_altitude: 'Go around altitude: '
-      approach_re_entry_waypoint_index: 'Approach re-entry waypoint index: '
+    waypoints: Waypoints
+    delete: Delete
+    delete_all: Delete all
+    add_waypoint: Add waypoint
+    direct_to: Direct-to
+    unsaved_changes: UNSAVED CHANGES
+    distance_time_mode:
+      .: 'Dist./time: '
+      auto: Auto
+      remaining: Remaining
+      between_waypoints: Between waypoints
+    problems:
+      .: INVALID FLIGHT PLAN
+      adjacent_with_same_position: 'There are adjacent waypoints with the same position (X: %s | Z: %s)'
+      no_approach_start: No approach start waypoint is set
+      not_enough_waypoints: At least two waypoints are required
+    phase:
+      takeoff: Takeoff
+      climb: Climb
+      cruise: Cruise
+      descend: Descend
+      approach: Approach
+      landing: Landing
+      go_around: Go around
+    phase_marker:
+      takeoff:
+        .: T/O
+        tooltip: Set as takeoff point
+      approach:
+        .: APPR
+        tooltip: Set as approach start point
+      land:
+        .: LAND
+        tooltip: Set as landing point
+    reset_takeoff_landing: Reset takeoff & landing
+    apply: Apply
+    undo: Undo
     save: Save
     load: Load
     error: An error occurred! Please check the log for details
-    discard_changes: Discard changes
-    coordinates: 'Coordinates: '
-    elevation: 'Elevation: '
 
 mode.flightassistant:
   thrust:
@@ -346,8 +355,6 @@ mode.flightassistant:
     speed: SPEED
     climb: THR CLB
     descend: THR DES
-    takeoff: THR TO # TODO: fix confusion with TOGA somehow
-    landing: THR LAND
   vertical:
     override: PITCH OVRD
     void_protection: VOID PROT
@@ -372,7 +379,6 @@ mode.flightassistant:
     direct_coordinates: DIR COORDS
     track_navigation: TRK NAV
     localizer: LOC
-    go_around: GA HDG
 
 # TODO: stop using this
 short.flightassistant:
@@ -383,13 +389,14 @@ short.flightassistant:
   autopilot: AP
   automation_modes: AUTO/MODE
   distance: DIST
+  elevation: ELEV
   elytra: EL
   elytra_durability: EL/DURA
   flight_directors: FLT DIR
   flight_directors_alt: FD
   flight_path: F/PATH
   ground: GRND
-  ground_speed: 'G/S%s'
+  ground_speed: 'GS'
   heading: HDG
   lateral_deviation: L/DEV
   infinite: INFN
@@ -404,6 +411,7 @@ short.flightassistant:
 status.flightassistant:
   thrust: 'THR: %s'
   firework_count: 'FRWK CNT: %s'
+  target_distance_time: 'DIST: %s (%s)'
   flight_plan:
     phase:
       takeoff: TAKEOFF
@@ -413,8 +421,6 @@ status.flightassistant:
       approach: APPROACH
       landing: LANDING
       go_around: GO AROUND
-    waypoint_distance: 'WP DIST: %s'
-    waypoint_time: 'WP TIME: %s'
 
 misc.flightassistant:
   waiting_for_world_load:
