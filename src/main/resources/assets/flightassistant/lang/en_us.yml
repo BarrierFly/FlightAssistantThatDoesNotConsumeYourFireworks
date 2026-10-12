@@ -43,8 +43,6 @@ alert.flightassistant: # TODO: get rid of alert categories, more flexible alert 
     explosive:
       main_hand: MAIN HAND EXPLOSIVE
       off_hand: OFF HAND EXPLOSIVE
-    slow_response: SLOW RESPONSE
-    no_response: NO RESPONSE
   flight_controls:
     .: F/CTL
     pitch_fault:

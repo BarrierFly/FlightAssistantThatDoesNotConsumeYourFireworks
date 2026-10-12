@@ -6,7 +6,6 @@
         "ClientLevelRunningNormallyInvoker",
         "EntityInvoker",
         "EntityTurnMixin",
-        "FireworkRocketEntityMixin",
         "gui.GuiMixinLayeredDraw",
         "gui.GuiMixinLegacy",
         "gui.GuiMixinNew",

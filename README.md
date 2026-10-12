@@ -19,6 +19,20 @@
 
 ---
 
+## 关于本仓库 / About this fork
+
+本仓库是 [Octol1ttle/FlightAssistant](https://github.com/Octol1ttle/FlightAssistant) 的 fork，与上游的主要区别如下：
+
+- **自动驾驶不再自动消耗你的烟花**：移除了自动驾驶自动发射烟花作为推力来源的逻辑。烟花的使用完全由玩家手动控制；烟花安全锁（爆炸烟花/前方有障碍物时禁止右键使用）与烟花数量显示等安全功能均予保留。
+- **临时禁用 Forge / NeoForge 构建**：目前只构建 Fabric 版本（1.20.1 / 1.21.1 / 1.21.6 / 1.21.9 / 1.21.11）。如需恢复 Forge 系构建，参见 `settings.gradle.kts` 中的注释。
+
+This repository is a fork of [Octol1ttle/FlightAssistant](https://github.com/Octol1ttle/FlightAssistant). The main differences from upstream are:
+
+- **The autopilot no longer consumes your fireworks**: the logic that made the autopilot automatically fire fireworks as a thrust source has been removed. Fireworks are now used purely manually; the safety features — the firework locks (right-clicking is blocked while holding explosive fireworks or when terrain is ahead) and the firework count HUD status — are kept intact.
+- **Forge / NeoForge builds are temporarily disabled**: only Fabric targets (1.20.1 / 1.21.1 / 1.21.6 / 1.21.9 / 1.21.11) are currently built. See the comment in `settings.gradle.kts` to restore them.
+
+---
+
 **FlightAssistant** is a powerful client-side mod that adds fully configurable full-fledged avionics, situational awareness tools and advanced automation to Minecraft elytras, while still being friendly to casual users. 
 
 ## Main Features

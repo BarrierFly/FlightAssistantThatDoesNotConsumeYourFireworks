@@ -33,8 +33,10 @@ stonecutter {
         fun mc(version: String, vararg loaders: String) {
             for (it in loaders) version("$version-$it", version)
         }
-        mc("1.20.1", "fabric", "forge")
-        mc("1.21.1", "fabric", "neoforge")
+        // Forge/NeoForge targets are temporarily disabled;
+        // restore by changing to mc("1.20.1", "fabric", "forge") and mc("1.21.1", "fabric", "neoforge")
+        mc("1.20.1", "fabric")
+        mc("1.21.1", "fabric")
         mc("1.21.6", "fabric")
         mc("1.21.9", "fabric")
         mc("1.21.11", "fabric")

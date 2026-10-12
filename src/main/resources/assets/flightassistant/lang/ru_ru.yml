@@ -47,8 +47,6 @@ alert.flightassistant:
     explosive:
       main_hand: ОСН РУКА ВЗРЫВООПАСН
       off_hand: ВТОР РУКА ВЗРЫВООПАСН
-    slow_response: МЕДЛЕН ОТКЛИК
-    no_response: ОТСУТСТВ ОТКЛИК
   flight_controls:
     .: УПР/ПОЛЕТ
     pitch_fault:

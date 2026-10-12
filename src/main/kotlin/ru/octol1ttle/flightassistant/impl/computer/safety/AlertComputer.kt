@@ -26,8 +26,6 @@ import ru.octol1ttle.flightassistant.impl.alert.fault.DisplayFaultAlert
 import ru.octol1ttle.flightassistant.impl.alert.fault.computer.AlertComputerFaultAlert
 import ru.octol1ttle.flightassistant.impl.alert.fault.computer.ComputerFaultAlert
 import ru.octol1ttle.flightassistant.impl.alert.firework.FireworkExplosiveAlert
-import ru.octol1ttle.flightassistant.impl.alert.firework.FireworkNoResponseAlert
-import ru.octol1ttle.flightassistant.impl.alert.firework.FireworkSlowResponseAlert
 import ru.octol1ttle.flightassistant.impl.alert.flight_controls.ProtectionsLostAlert
 import ru.octol1ttle.flightassistant.impl.alert.flight_plan.ArrivalElevationDisagreeAlert
 import ru.octol1ttle.flightassistant.impl.alert.flight_plan.DepartureElevationDisagreeAlert
@@ -95,8 +93,6 @@ class AlertComputer(computers: ComputerBus, private val soundManager: SoundManag
                 .add(ComputerFaultAlert(computers, FireworkComputer.ID, Component.translatable("alert.flightassistant.firework.fault")))
                 .add(FireworkExplosiveAlert(computers, InteractionHand.MAIN_HAND))
                 .add(FireworkExplosiveAlert(computers, InteractionHand.OFF_HAND))
-                .add(FireworkNoResponseAlert(computers))
-                .add(FireworkSlowResponseAlert(computers))
         )
         register(
             AlertCategory(Component.translatable("alert.flightassistant.flight_controls"))

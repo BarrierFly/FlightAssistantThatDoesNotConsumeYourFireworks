@@ -80,7 +80,7 @@ internal object ComputerHost : ModuleController<Computer>, ComputerBus {
 
         register(FlightPlanComputer.ID, FlightPlanComputer(this))
         register(AutoFlightComputer.ID, AutoFlightComputer(this))
-        register(FireworkComputer.ID, FireworkComputer(this, mc))
+        register(FireworkComputer.ID, FireworkComputer(this))
         register(PitchComputer.ID, PitchComputer(this))
         register(HeadingComputer.ID, HeadingComputer(this))
         register(RollComputer.ID, RollComputer(this))
