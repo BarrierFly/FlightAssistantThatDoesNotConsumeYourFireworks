@@ -7,6 +7,9 @@ import net.minecraft.client.gui.components.*
 import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.narration.NarratableEntry
 import net.minecraft.network.chat.Component
+//? if >=1.21.9 {
+/*import net.minecraft.client.input.MouseButtonEvent
+*///?}
 import ru.octol1ttle.flightassistant.FlightAssistant.mc
 import ru.octol1ttle.flightassistant.api.computer.ComputerBus
 import ru.octol1ttle.flightassistant.api.util.FATickCounter
@@ -29,7 +32,6 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
         /*override fun renderContent(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
             val left = contentX
             val top = contentY
-            val index = list.children().indexOf(this)
 *///?} else {
         override fun render(guiGraphics: GuiGraphics, index: Int, top: Int, left: Int, width: Int, height: Int, mouseX: Int, mouseY: Int, hovering: Boolean, partialTick: Float) {
 //?}
@@ -39,11 +41,11 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
             guiGraphics.hLine(x + textWidth(phase) + 5, width - 40, y, grayColor)
         }
 
-        override fun children(): List<GuiEventListener?> {
+        override fun children(): List<GuiEventListener> {
             return emptyList()
         }
 
-        override fun narratables(): List<NarratableEntry?> {
+        override fun narratables(): List<NarratableEntry> {
             return emptyList()
         }
     }
@@ -237,12 +239,43 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
 
 //? if >=1.21.9 {
         /*override fun mouseClicked(event: MouseButtonEvent, isDoubleClick: Boolean): Boolean {
-            val button = event.button()
             val callSuper = { super.mouseClicked(event, isDoubleClick) }
+            if (this.hovering && event.button() == 0) {
+                if (!this.isDragging) {
+                    holdStartTime = FATickCounter.totalTicks
+                }
+                this.isDragging = true
+                callSuper()
+                return true
+            }
+
+            return callSuper()
+        }
+
+        override fun mouseReleased(event: MouseButtonEvent): Boolean {
+            val callSuper = { super.mouseReleased(event) }
+            val entryAtPosition = list.getEntryAtPosition(event.x(), event.y())
+            val waypoints = list.state.waypoints
+            if (this.isDragging) {
+                if (entryAtPosition is WaypointEntry && entryAtPosition.state != this.state && waypoints.remove(this.state)) {
+                    waypoints.add(waypoints.indexOf(entryAtPosition.state), this.state)
+                    list.rebuildEntries()
+                    callSuper()
+                    return true
+                }
+                if (event.y() > list.endY && waypoints.remove(this.state)) {
+                    waypoints.add(this.state)
+                    list.rebuildEntries()
+                    callSuper()
+                    return true
+                }
+            }
+
+            return callSuper()
+        }
 *///?} else {
         override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
             val callSuper = { super.mouseClicked(mouseX, mouseY, button) }
-//?}
             if (this.hovering && button == 0) {
                 if (!this.isDragging) {
                     holdStartTime = FATickCounter.totalTicks
@@ -255,13 +288,7 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
             return callSuper()
         }
 
-//? if >=1.21.9 {
-        /*override fun mouseReleased(event: MouseButtonEvent): Boolean {
-            val button = event.button()
-            val callSuper = { super.mouseReleased(event) }
-*///?} else {
         override fun mouseReleased(mouseX: Double, mouseY: Double, button: Int): Boolean {
-//?}
             val callSuper = { super.mouseReleased(mouseX, mouseY, button) }
             val entryAtPosition = list.getEntryAtPosition(mouseX, mouseY)
             val waypoints = list.state.waypoints
@@ -282,15 +309,29 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
 
             return callSuper()
         }
+//?}
     }
 
     val endY: Int
+        // Bottom edge of the rendered entry area, independent of scrolling.
+        //? if >=1.21.6 {
+        /*get() = getY() + contentHeight() - 1
+        *///?}
+        //? if <1.21.1 {
         get() = y0 + maxPosition + 3
+        //?}
+        //? if >=1.21.1 <1.21.6 {
+        /*get() = getY() + maxPosition + 3
+        *///?}
 
     fun fromListIndex(listIndex: Int): Int {
         var index = listIndex
         for (i in 0..listIndex) {
+            //? if <1.21.9 {
             if (getEntry(i) is PhaseEntry) {
+            //?} else {
+            /*if (children()[i] is PhaseEntry) {
+            *///?}
                 index--
             }
         }
@@ -301,22 +342,32 @@ class WaypointsList(y0: Int, y1: Int, width: Int, val computers: ComputerBus, va
         return children().indexOfFirst { it is WaypointEntry && it.index == waypointIndex }
     }
 
+    //? if >=1.21.9 {
+    /*private val halfItemHeight: Int = defaultEntryHeight / 2
+*///?} else {
+    private val halfItemHeight: Int = itemHeight / 2
+//?}
+    //? if >=1.21.1 {
+    /*override fun renderListItems(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
+        super.renderListItems(guiGraphics, mouseX, mouseY, partialTick)
+*///?} else {
     override fun renderList(guiGraphics: GuiGraphics, mouseX: Int, mouseY: Int, partialTick: Float) {
         super.renderList(guiGraphics, mouseX, mouseY, partialTick)
+//?}
         when (val tracking = state.tracking) {
             is FlightPlanComputer.ActiveSegment.Direct -> {
-                val y = getRowTop(toListIndex(tracking.index)) + itemHeight / 2 - 2
+                val y = getRowTop(toListIndex(tracking.index)) + halfItemHeight - 2
                 guiGraphics.hLine(rowLeft + 10, rowLeft + 22, y, primaryAdvisoryColor)
                 guiGraphics.drawString(">", rowLeft + 22, y - 3, primaryAdvisoryColor)
             }
             is FlightPlanComputer.ActiveSegment.Leg -> {
-                val targetY = getRowTop(toListIndex(tracking.targetIndex)) + itemHeight / 2 - 2
+                val targetY = getRowTop(toListIndex(tracking.targetIndex)) + halfItemHeight - 2
                 guiGraphics.hLine(rowLeft + 10, rowLeft + 22, targetY, primaryAdvisoryColor)
                 guiGraphics.drawString(">", rowLeft + 22, targetY - 3, primaryAdvisoryColor)
 
                 val originIndex = state.waypoints.indexOf(WaypointsScreenState.Waypoint(tracking.origin))
                 if (originIndex > -1) {
-                    val originY = getRowTop(toListIndex(originIndex)) + itemHeight / 2 - 2
+                    val originY = getRowTop(toListIndex(originIndex)) + halfItemHeight - 2
                     guiGraphics.hLine(rowLeft + 10, rowLeft + 25, originY, primaryAdvisoryColor)
                     guiGraphics.vLine(rowLeft + 10, originY, targetY, primaryAdvisoryColor)
                 }

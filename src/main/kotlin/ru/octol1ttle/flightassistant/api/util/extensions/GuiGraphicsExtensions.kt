@@ -160,10 +160,18 @@ fun org.joml.Matrix3x2fStack.pop() {
 //? if >=1.21.9 {
 /*fun GuiGraphics.renderOutline(x: Int, y: Int, width: Int, height: Int, color: Int) {
 //? if >=1.21.11 {
-    /^renderOutline(
-^///?} else
+    renderOutline(
+//?} else {
     submitOutline(
+//?}
         x, y, width, height, color)
     renderDeferredElements()
 }
-*///?}
+*///?} else {
+fun GuiGraphics.renderOutline(x: Int, y: Int, width: Int, height: Int, color: Int) {
+    fill(x, y, x + width, y + 1, color)
+    fill(x, y + height - 1, x + width, y + height, color)
+    fill(x, y, x + 1, y + height, color)
+    fill(x + width - 1, y, x + width, y + height, color)
+}
+//?}
